@@ -24,14 +24,14 @@ public class DenseDoubleVector extends AbstractVector {
 	public DenseDoubleVector(int numberOfDimensions) {
 		internalVector = new DenseVector(numberOfDimensions);
 	}
-
+	
 	/**
 	 * Creates a dense vector from the given data.
 	 * 
 	 * @param data
 	 *            A double array, which can be interpreted as a vector.
 	 */
-	public DenseDoubleVector(double[] data) {
+	public DenseDoubleVector(double... data) {
 		internalVector = new DenseVector(Arrays.copyOf(data, data.length));
 	}
 
