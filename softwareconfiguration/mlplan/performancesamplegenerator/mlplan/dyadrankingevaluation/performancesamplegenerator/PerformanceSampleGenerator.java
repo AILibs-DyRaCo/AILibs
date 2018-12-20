@@ -1,9 +1,12 @@
 package mlplan.dyadrankingevaluation.performancesamplegenerator;
 
-
 import java.io.File;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.aeonbits.owner.ConfigFactory;
+
+import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
+import de.upb.crc901.mlpipeline_evaluation.ConsistentMLPipelineEvaluator;
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
@@ -15,6 +18,8 @@ import hasco.model.ComponentInstance;
 import jaicore.basic.SQLAdapter;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.random.RandomSearch;
@@ -23,56 +28,69 @@ import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GraphSearchInput;
 import jaicore.search.model.travesaltree.Node;
 
+/**
+ * Simple class that can be used to generate performance samples from the
+ * ML-Plan search space for datasets from OpenML. Therefore a
+ * {@link RandomSearch} is applied to the search space graph return by ML-Plan.
+ * 
+ * @author Jonas Hanselle
+ *
+ */
 public class PerformanceSampleGenerator {
 
-	public static void main(String args[]) {
-		PerformanceSampleGenerator psg = new PerformanceSampleGenerator();
-		psg.evaluate();
-	}
-	
-	public void evaluate() {
-		try {
-			SQLAdapter adapter = new SQLAdapter("host", "user", "password", "databse");
-			PerformanceDBAdapter performanceDBAdapter = new PerformanceDBAdapter(adapter, "performance_stuff");
-			MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
-					new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"),
-					new File("conf/automl/mlplan.properties"), MultiClassPerformanceMeasure.ERRORRATE,
-					performanceDBAdapter);
+	private IPerformanceSampleGeneratorConfig config;
 
-			MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
-			
-			ReproducibleInstances data = ReproducibleInstances.fromOpenML("181", "4350e421cdc16404033ef1812ea38c01");
-			data.setCacheLookup(false);
+	public PerformanceSampleGenerator() {
+		this.config = ConfigFactory.create(IPerformanceSampleGeneratorConfig.class);
+	}
+
+	public void evaluate(String openmlID) {
+
+		try {
+			SQLAdapter adapter = new SQLAdapter(config.getDBHost(), config.getDBUsername(), config.getDBPassword(),
+					config.getDBDatabaseName());
+			PerformanceDBAdapter performanceDBAdapter = new PerformanceDBAdapter(adapter, config.getDBTableName());
+
+			ZeroOneLoss lossFunction = new ZeroOneLoss();
+			CacheEvaluatorMeasureBridge bridge = new CacheEvaluatorMeasureBridge(lossFunction, performanceDBAdapter);
+			MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
+			ReproducibleInstances data = ReproducibleInstances.fromOpenML(openmlID, config.getOpenMLKey());
+			data.setCacheLookup(true);
 			data.setCacheStorage(true);
 			data.setClassIndex(data.numAttributes() - 1);
 			mlplan.setLoggerName("mlplan");
-			mlplan.setTimeout(60);
 			mlplan.setData(data);
-//			mlplan.setPreferredNodeEvaluator(this.new UninformedNodeEvaluator());
-//			mlplan.buildClassifier(data);
 			GraphGenerator gg = mlplan.getGraphGenerator();
 			GraphSearchInput gsi = new GraphSearchInput(gg);
-			RandomSearch rs = new RandomSearch(gsi, 0);
-			while(rs.hasNext()) {
+			RandomSearch rs = new RandomSearch(gsi, config.getRandomSearchSeed());
+			while (rs.hasNext()) {
 				SearchGraphPath sgp = rs.nextSolution();
-//				System.out.println(sgp.toString());
-				TFDNode goalNode = (TFDNode) sgp.getNodes().get(sgp.getNodes().size()-1);
-				ComponentInstance ci = Util.getSolutionCompositionFromState(mlplan.getComponents(), goalNode.getState(), false);
+				TFDNode goalNode = (TFDNode) sgp.getNodes().get(sgp.getNodes().size() - 1);
 				WEKAPipelineFactory factory = new WEKAPipelineFactory();
-				MLPipeline mlp = factory.getComponentInstantiation(ci);
-				System.out.println(mlp);
+				ComponentInstance ci = Util.getSolutionCompositionFromState(mlplan.getComponents(), goalNode.getState(),
+						true);
+				try {
+					MLPipeline mlp = factory.getComponentInstantiation(ci);
+					CacheEvaluatorMeasureBridge shallowBridge = ((CacheEvaluatorMeasureBridge) bridge)
+							.getShallowCopy(ci);
+					MonteCarloCrossValidationEvaluator evaluator = new MonteCarloCrossValidationEvaluator(shallowBridge,
+							config.getNumberMCCVRepeats(), data, config.getMCCVTrainRatio(), config.getMCCVSeed());
+					double score = evaluator.evaluate(mlp);
+					System.out.println(mlp);
+					System.out.println("score: " + score);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	private class UninformedNodeEvaluator implements INodeEvaluator<TFDNode, Double>{
 
-		@Override
-		public Double f(Node<TFDNode, ?> node) throws Exception {
-			return 0.3;
-		}
+	public static void main(String args[]) {
+		String openmlID = args[0];
+		PerformanceSampleGenerator psg = new PerformanceSampleGenerator();
+		psg.evaluate(openmlID);
 	}
 }

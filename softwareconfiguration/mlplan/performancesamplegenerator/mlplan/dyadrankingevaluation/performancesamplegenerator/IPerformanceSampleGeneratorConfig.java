@@ -26,6 +26,11 @@ public interface IPerformanceSampleGeneratorConfig extends Mutable{
 	 * Seed for random search.
 	 */
 	public static final String K_RANDOM_SEARCH_SEED = "randomSearchSeed";
+
+	/**
+	 * OpenML Key.
+	 */
+	public static final String K_OPENML_KEY = "openMLKey";
 	
 	/**
 	 * Database connection.
@@ -55,6 +60,9 @@ public interface IPerformanceSampleGeneratorConfig extends Mutable{
 	@DefaultValue("1")
 	public int getRandomSearchSeed();
 	
+	@Key(K_OPENML_KEY)
+	public String getOpenMLKey();
+	
 	@Key(DB_HOST)
 	public String getDBHost();
 
@@ -72,4 +80,5 @@ public interface IPerformanceSampleGeneratorConfig extends Mutable{
 
 	@Key(DB_SSL)
 	public Boolean getDBSSL();
+
 }
