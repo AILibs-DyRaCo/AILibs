@@ -1,14 +1,7 @@
-package mlplan.dyadrankingevaluation.performancesamplegenerator;
-
-import java.io.File;
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.aeonbits.owner.ConfigFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
-import de.upb.crc901.mlpipeline_evaluation.ConsistentMLPipelineEvaluator;
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
@@ -17,17 +10,13 @@ import hasco.core.Util;
 import hasco.model.ComponentInstance;
 import jaicore.basic.SQLAdapter;
 import jaicore.ml.cache.ReproducibleInstances;
-import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GraphSearchInput;
-import jaicore.search.model.travesaltree.Node;
-
 /**
  * Simple class that can be used to generate performance samples from the
  * ML-Plan search space for datasets from OpenML. Therefore a
@@ -37,6 +26,12 @@ import jaicore.search.model.travesaltree.Node;
  *
  */
 public class PerformanceSampleGenerator {
+	
+	public static void main(String args[]) {
+		String openmlID = args[0];
+		PerformanceSampleGenerator psg = new PerformanceSampleGenerator();
+		psg.evaluate(openmlID);
+	}
 
 	private IPerformanceSampleGeneratorConfig config;
 
@@ -88,9 +83,4 @@ public class PerformanceSampleGenerator {
 		}
 	}
 
-	public static void main(String args[]) {
-		String openmlID = args[0];
-		PerformanceSampleGenerator psg = new PerformanceSampleGenerator();
-		psg.evaluate(openmlID);
-	}
 }
