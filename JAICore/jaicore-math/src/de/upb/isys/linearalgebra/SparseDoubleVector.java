@@ -52,7 +52,7 @@ public class SparseDoubleVector extends AbstractVector {
 	 * @param data
 	 *            A double array, which can be interpreted as a vector.
 	 */
-	public SparseDoubleVector(double[] data) {
+	public SparseDoubleVector(double... data) {
 		List<Integer> indicesWithNonZeroEntry = new ArrayList<>();
 		List<Double> nonZeroEntries = new ArrayList<>();
 		for (int i = 0; i < data.length; i++) {
