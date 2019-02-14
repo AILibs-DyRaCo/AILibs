@@ -93,7 +93,7 @@ public class WekaMLPlanWekaUtil {
 					ASEvaluation.forName(evaluation9, new String[] {})));
 
 			for (Component component : components) {
-				if (component.getName().contains("classifier")) {
+				if (component.getName().contains("classifier") && !component.getName().contains("supportVector")) {
 					Classifier c = AbstractClassifier.forName(component.getName(), new String[] {});
 					classifiers.add(c);
 				}
