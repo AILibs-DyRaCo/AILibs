@@ -97,6 +97,17 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 		this.config = config;
 	}
 
+	public MLPlanWekaClassifier(final Collection<Component> components, final File componentFile,
+			final ClassifierFactory factory,
+			final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge,
+			final MLPlanClassifierConfig config) throws IOException {
+		this.componentFile = componentFile;
+		this.components = components;
+		this.factory = factory;
+		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
+		this.config = config;
+	}
+
 	@Override
 	public boolean hasNext() {
 		return this.state != AlgorithmState.inactive;
@@ -129,8 +140,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			/* set up exact splits */
 			double selectionDataPortion = this.config.dataPortionForSelection();
 			if (selectionDataPortion > 0) {
-				List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.data,
-						this.config.randomSeed(), selectionDataPortion);
+				List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.data, this.config.randomSeed(),
+						selectionDataPortion);
 				this.dataShownToSearch = selectionSplit.get(1);
 			} else {
 				this.dataShownToSearch = this.data;
@@ -167,16 +178,14 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(
 					this.evaluationMeasurementBridge, this.config.numberOfMCIterationsDuringSearch(),
 					this.dataShownToSearch, this.config.getMCCVTrainFoldSizeDuringSearch(), this.config.randomSeed());
-			
 
 			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
 				if (evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 					CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) evaluationMeasurementBridge)
 							.getShallowCopy(c);
-				
-					
+
 					long seed = this.getConfig().randomSeed() + c.hashCode();
-					
+
 					IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(
 							bridge, this.config.numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
 							this.config.getMCCVTrainFoldSizeDuringSearch(), seed);
@@ -208,8 +217,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 				return percentile;
 			};
 
-			TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile,
-					"AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
+			TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.components,
+					componentFile, "AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
 
 			/* configure and start optimizing factory */
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(
@@ -218,6 +227,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			this.hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(
 					this.getSemanticNodeEvaluator(this.dataShownToSearch), this.preferredNodeEvaluator));
 			this.hascoFactory.setConfig(this.config);
+			hascoFactory.getConfig();
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
 			this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.SECONDS);
@@ -275,7 +285,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	public void setTimeout(final int timeout, final TimeUnit timeUnit) {
 
 	}
-	
+
 	@Override
 	public void setTimeout(final TimeOut timeout) {
 
@@ -293,7 +303,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 
 	@Override
 	public void cancel() {
-		
+
 	}
 
 	protected abstract INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data);

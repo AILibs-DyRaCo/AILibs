@@ -2,6 +2,7 @@ package hasco.variants.forwarddecomposition.twophase;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
@@ -18,6 +19,12 @@ public class TwoPhaseSoftwareConfigurationProblem extends RefinementConfiguredSo
 	public TwoPhaseSoftwareConfigurationProblem(File configurationFile, String requiredInterface, IObjectEvaluator<ComponentInstance, Double> compositionEvaluator,
 			IObjectEvaluator<ComponentInstance, Double> selectionBenchmark) throws IOException {
 		super(configurationFile, requiredInterface, compositionEvaluator);
+		this.selectionBenchmark = selectionBenchmark;
+	}
+	
+	public TwoPhaseSoftwareConfigurationProblem(Collection<Component> components, File configurationFile, String requiredInterface, IObjectEvaluator<ComponentInstance, Double> compositionEvaluator,
+			IObjectEvaluator<ComponentInstance, Double> selectionBenchmark) throws IOException {
+		super(components, configurationFile, requiredInterface, compositionEvaluator);
 		this.selectionBenchmark = selectionBenchmark;
 	}
 

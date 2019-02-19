@@ -2,6 +2,7 @@ package hasco.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 
 import hasco.model.Component;
@@ -24,6 +25,11 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 
 	public RefinementConfiguredSoftwareConfigurationProblem(File configurationFile, String requiredInterface, IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException, UnresolvableRequiredInterfaceException {
 		super(configurationFile, requiredInterface, compositionEvaluator);
+		this.paramRefinementConfig = new ComponentLoader(configurationFile).getParamConfigs();
+	}
+	
+	public RefinementConfiguredSoftwareConfigurationProblem(Collection<Component> components, File configurationFile, String requiredInterface, IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
+		super(components, requiredInterface, compositionEvaluator);
 		this.paramRefinementConfig = new ComponentLoader(configurationFile).getParamConfigs();
 	}
 	
