@@ -28,6 +28,7 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 	public SoftwareConfigurationProblem(final Collection<Component> components, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) {
 		super();
 		this.components = components;
+		System.out.println("comps hier: " + components);
 		this.requiredInterface = requiredInterface;
 		this.compositionEvaluator = compositionEvaluator;
 	}

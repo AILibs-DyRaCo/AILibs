@@ -65,9 +65,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 		/* sanity checks */
 		this.logger.info("Starting an ML-Plan instance.");
-		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
-			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
-		}
+//		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
+//			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
+//		}
 		if (builder.getClassifierFactory() == null) {
 			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
 		}
@@ -104,7 +104,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
 		IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(builder.getClassifierFactory(), evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSelection(),
 				MLPlan.this.getInput(), this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed());
-		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
+//		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
+		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(builder.getComponents(), builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
 
 		/* create 2-phase HASCO */
 		this.logger.info("Creating the twoPhaseHASCOFactory.");

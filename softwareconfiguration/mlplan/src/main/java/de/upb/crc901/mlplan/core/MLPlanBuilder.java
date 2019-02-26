@@ -118,6 +118,26 @@ public class MLPlanBuilder {
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
 		return this;
 	}
+	
+
+	public MLPlanBuilder withAutoWEKAConfiguration(Collection<Component> newComponents) throws IOException {
+		if (this.searchSpaceConfigFile == null) {
+			withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
+		}
+		File fileOfPreferredComponents = getAlgorithmConfig().preferredComponents();
+		List<String> ordering;
+		if (!fileOfPreferredComponents.exists()) {
+			logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", fileOfPreferredComponents.getAbsolutePath());
+			ordering = new ArrayList<>();
+		} else {
+			ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
+		}
+		withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(newComponents, ordering));
+		this.classifierFactory = new WEKAPipelineFactory();
+		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
+		this.components = newComponents;
+		return this;
+	}
 
 	public MLPlanBuilder withAlgorithmConfigFile(File algorithmConfigFile) throws IOException {
 		return withAlgorithmConfig(loadOwnerConfig(algorithmConfigFile));
