@@ -50,6 +50,6 @@ public abstract class AWEKAPerformanceDecisionTreeBasedFeatureGenerator
 	 * @param data
 	 * @throws Exception
 	 */
-	protected abstract void train(Instances data) throws Exception;
+	public abstract void train(Instances data) throws Exception;
 
 }

@@ -28,7 +28,7 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 	private double nonOccurenceValue = -1;
 
 	@Override
-	protected void train(Instances data) throws Exception {
+	public void train(Instances data) throws Exception {
 		// Step 1: Train Random Tree
 		randomTree.buildClassifier(data);
 
