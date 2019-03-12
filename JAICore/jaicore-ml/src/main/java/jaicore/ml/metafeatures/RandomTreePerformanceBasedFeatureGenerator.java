@@ -110,13 +110,14 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		try {
+			builder.append(randomTree.NOT_DRAWABLE);
 			builder.append(randomTree);
 		} catch (Exception e) {
 			builder.append("Can not print tree");
 		}
 		builder.append(System.lineSeparator());
-		builder.append(nodesIndices);
-		builder.append(System.lineSeparator());
+		// builder.append(nodesIndices);
+		// builder.append(System.lineSeparator());
 		return builder.toString();
 	}
 
@@ -220,5 +221,15 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 	 */
 	public void setNonOccurenceValue(double nonOccurenceValue) {
 		this.nonOccurenceValue = nonOccurenceValue;
+	}
+
+	/**
+	 * Get the RandomTree used to construct the tree. Can be used to configure how
+	 * the tree is construct if set before a train method is called.
+	 * 
+	 * @return the randomtree used to construct the internal tree
+	 */
+	public RandomTree getRandomTree() {
+		return randomTree;
 	}
 }
