@@ -39,6 +39,7 @@ public class DyadStandardScaler extends AbstractDyadScaler {
 					if (!ignoredIndices.contains(i)) {
 						double value = dyad.getInstance().getValue(i);
 						value -= statsX[i].getMean();
+						if(statsX[i].getStandardDeviation() != 0)
 						value /= statsX[i].getStandardDeviation();
 						dyad.getInstance().setValue(i, value);
 					}
@@ -57,6 +58,7 @@ public class DyadStandardScaler extends AbstractDyadScaler {
 					if (!ignoredIndices.contains(i)) {
 						double value = dyad.getAlternative().getValue(i);
 						value -= statsY[i].getMean();
+						if(statsY[i].getStandardDeviation() != 0)
 						value /= statsY[i].getStandardDeviation();
 						dyad.getAlternative().setValue(i, value);
 					}

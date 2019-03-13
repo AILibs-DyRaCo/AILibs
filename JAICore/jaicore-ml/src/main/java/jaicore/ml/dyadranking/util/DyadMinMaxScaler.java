@@ -44,6 +44,8 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 				for (int i = 0; i < lengthX; i++) {
 					double value = dyad.getInstance().getValue(i);
 					value -= statsX[i].getMin();
+					// prevent division by zero
+					if((statsX[i].getMax() - statsX[i].getMin()) != 0)
 					value /= statsX[i].getMax() - statsX[i].getMin();
 					dyad.getInstance().setValue(i, value);
 				}
@@ -68,6 +70,8 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 					if (!ignoredIndices.contains(i)) {
 						double value = dyad.getAlternative().getValue(i);
 						value -= statsY[i].getMin();
+						// prevent division by zero						
+						if((statsY[i].getMax() - statsY[i].getMin()) != 0)
 						value /= statsY[i].getMax() - statsY[i].getMin();
 						dyad.getAlternative().setValue(i, value);
 					}
